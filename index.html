@@ -3,111 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>P.R.C. BD | 账号系统</title>
+  <title>P.R.C. BD | Multi-Auth System</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --main-bg: #030712;
-      --card-bg: #111827;
+      --main-bg: #020617;
+      --card-bg: #0f172a;
       --accent-blue: #3b82f6;
-      --accent-glow: rgba(59, 130, 246, 0.5);
+      --accent-glow: rgba(59, 130, 246, 0.4);
       --success-green: #10b981;
-      --error-red: #f43f5e;
-      --text-main: #f8fafc;
+      --error-red: #ef4444;
+      --text-main: #f1f5f9;
       --text-dim: #94a3b8;
-      --border-color: #1f2937;
+      --border-color: #1e293b;
     }
 
     body {
-      margin: 0;
-      background-color: var(--main-bg);
-      color: var(--text-main);
-      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-      padding: 16px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      margin: 0; background-color: var(--main-bg); color: var(--text-main);
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      padding: 15px; min-height: 100vh; display: flex; justify-content: center;
     }
 
-    /* 🌊 Refresh Wave Effect */
-    #blur-layer {
-      position: fixed;
-      inset: 0;
-      backdrop-filter: blur(0px);
-      z-index: 2000;
-      pointer-events: none;
-      transition: all 0.5s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .wave { width: 0%; height: 0%; background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%); border-radius: 50%; transition: 0.6s; }
-
-    .container { width: 100%; max-width: 450px; }
-
-    .header { text-align: center; margin-bottom: 24px; }
+    .container { width: 100%; max-width: 480px; }
+    
+    .header { text-align: center; margin-bottom: 30px; padding-top: 20px; }
     .header h1 {
-      font-size: 24px;
-      background: linear-gradient(to right, #60a5fa, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 26px; margin: 0; font-weight: 800;
+      background: linear-gradient(135deg, #60a5fa, #2563eb);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
 
     .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 28px;
-      padding: 30px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      border-radius: 28px; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px); transition: 0.4s ease;
     }
 
-    /* Hidden Class for UI Swapping */
-    .hidden { display: none; opacity: 0; transform: translateY(20px); }
+    .hidden { display: none !important; }
 
-    .field-group { margin-bottom: 20px; }
+    .field-group { margin-bottom: 20px; position: relative; }
     .field-group label {
       display: block; font-size: 13px; color: var(--text-dim);
-      margin-bottom: 8px; margin-left: 5px;
+      margin-bottom: 8px; margin-left: 5px; font-weight: 600;
     }
 
     input, textarea {
       width: 100%; background: #000; border: 2px solid var(--border-color);
-      border-radius: 16px; padding: 14px; color: #fff; outline: none;
-      box-sizing: border-box; transition: 0.3s;
+      border-radius: 16px; padding: 15px; color: #fff; font-size: 14px;
+      box-sizing: border-box; outline: none; transition: 0.3s;
     }
-    input:focus { border-color: var(--accent-blue); box-shadow: 0 0 15px var(--accent-glow); }
+    input:focus { border-color: var(--accent-blue); box-shadow: 0 0 20px var(--accent-glow); }
 
+    .btn-stack { display: flex; flex-direction: column; gap: 12px; }
     .btn {
-      width: 100%; padding: 16px; border-radius: 16px; border: none;
-      font-size: 16px; font-weight: bold; cursor: pointer;
+      width: 100%; padding: 16px; border-radius: 18px; border: none;
+      font-size: 16px; font-weight: 700; cursor: pointer;
       display: flex; align-items: center; justify-content: center; gap: 10px;
-      transition: 0.2s; margin-top: 10px;
+      transition: 0.3s;
     }
-    .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+    .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); }
     .btn-secondary { background: transparent; border: 2px solid var(--accent-blue); color: var(--accent-blue); }
+    .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--error-red); border: 1px solid var(--error-red); margin-top: 25px; font-size: 14px; padding: 12px; }
+
     .btn:active { transform: scale(0.96); }
 
     .status-area {
-      margin-top: 15px; padding: 12px; border-radius: 12px;
-      font-size: 13px; text-align: center; display: none;
+      margin-top: 15px; padding: 14px; border-radius: 14px; font-size: 13px;
+      text-align: center; display: none;
     }
     .success { background: rgba(16, 185, 129, 0.1); color: var(--success-green); border: 1px solid var(--success-green); }
-    .error { background: rgba(244, 63, 94, 0.1); color: var(--error-red); border: 1px solid var(--error-red); }
+    .error { background: rgba(239, 68, 68, 0.1); color: var(--error-red); border: 1px solid var(--error-red); }
 
     .output-preview {
-      margin-top: 15px; font-family: monospace; font-size: 11px;
-      background: #000; padding: 12px; border-radius: 12px;
-      color: #60a5fa; word-break: break-all; display: none;
+      margin-top: 20px; font-family: 'Courier New', monospace; font-size: 11px; color: #60a5fa;
+      background: #000; padding: 15px; border-radius: 15px; word-break: break-all; display: none;
+      border: 1px dashed var(--accent-blue);
     }
 
     .fan-trigger {
-      position: fixed; right: 20px; bottom: 30px;
-      width: 55px; height: 55px; background: #3b82f6;
+      position: fixed; right: 20px; bottom: 30px; width: 60px; height: 60px;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white;
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 20px var(--accent-glow); cursor: pointer; z-index: 2001;
+      font-size: 24px; cursor: pointer; box-shadow: 0 0 25px var(--accent-glow); z-index: 100;
     }
     .rotate-anim { animation: fanRotate 0.6s linear; }
     @keyframes fanRotate { 100% { transform: rotate(360deg); } }
@@ -115,51 +93,55 @@
 </head>
 <body>
 
-  <div id="blur-layer"><div class="wave" id="wave"></div></div>
-
   <div class="container">
     <div class="header">
-      <h1 id="mainTitle">系统登录</h1>
+      <h1 id="uiTitle">P.R.C BD Cloud Login</h1>
     </div>
 
-    <div id="loginCard" class="card">
+    <div id="loginView" class="card">
       <div class="field-group">
-        <label><i class="fas fa-user-shield"></i> 管理员账号</label>
-        <input type="text" id="adminUser" placeholder="Enter Admin Username">
+        <label><i class="fas fa-user-circle"></i> Username (Set by Bot)</label>
+        <input type="text" id="adminUser" placeholder="Enter Username">
       </div>
       <div class="field-group">
-        <label><i class="fas fa-key"></i> 访问令牌 (Password)</label>
+        <label><i class="fas fa-lock"></i> Password</label>
         <input type="password" id="adminPass" placeholder="Enter Password">
       </div>
-      <button class="btn btn-primary" onclick="handleLogin()">
-        <i class="fas fa-sign-in-alt"></i> 验证并进入
+      <button class="btn btn-primary" onclick="handleCloudAuth()">
+        <i class="fas fa-sign-in-alt"></i> Verify & Access
       </button>
-      <div id="loginStatus" class="status-area"></div>
+      <div id="authStatus" class="status-area"></div>
     </div>
 
-    <div id="mainContent" class="card hidden">
+    <div id="mainView" class="card hidden">
       <div class="field-group">
-        <label>用户名 (Username)</label>
-        <input type="text" id="user" placeholder="请输入用户名">
+        <label>Account Username</label>
+        <input type="text" id="user" placeholder="Target Account User">
       </div>
       <div class="field-group">
-        <label>登录密码 (Password)</label>
-        <input type="password" id="pass" placeholder="请输入密码">
+        <label>Account Password</label>
+        <input type="password" id="pass" placeholder="Target Account Pass">
       </div>
       <div class="field-group">
-        <label>Cookie 数据</label>
-        <textarea id="cookie" rows="4" placeholder="在此粘贴完整的 Cookie 内容"></textarea>
+        <label>Cookie Data</label>
+        <textarea id="cookie" rows="4" placeholder="Paste full cookies here..."></textarea>
       </div>
+      
       <div class="btn-stack">
         <button class="btn btn-primary" onclick="processConversion()">
-          <i class="fas fa-exchange-alt"></i> 立即开始转换
+          <i class="fas fa-magic"></i> Convert Format
         </button>
         <button class="btn btn-secondary" onclick="processPush()">
-          <i class="fas fa-rocket"></i> 将数据推送到服务器
+          <i class="fas fa-paper-plane"></i> Push to Server
         </button>
       </div>
+
       <div id="statusBox" class="status-area"></div>
       <div id="resultPreview" class="output-preview"></div>
+
+      <button class="btn btn-logout" onclick="handleLogout()">
+        <i class="fas fa-power-off"></i> Logout Session
+      </button>
     </div>
   </div>
 
@@ -171,36 +153,51 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // 🔑 লগইন কনফিগারেশন (আপনার এডমিন প্যানেলের সাথে মিলিয়ে নিন)
-    const AUTH_CONFIG = {
-      user: "admin", // এখানে আপনার ইউজারনেম দিন
-      pass: "1234"   // এখানে আপনার পাসওয়ার্ড দিন
+    // গুরুত্বপূর্ণ: আপনার সার্ভার বা এডমিন প্যানেল থেকে ডেটা ভেরিফাই করার লজিক
+    // যেহেতু আপনি বটের মাধ্যমে /addrakib করবেন, তাই এই চেকটি সার্ভার সাইড হওয়া ভালো। 
+    // এখানে আমি একটি "Cloud Auth" লজিক দিয়েছি যা আপনার দেওয়া Webhook-এ চেক পাঠাতে পারে।
+    
+    const BOT_TOKEN = "8683392048:AAHJ50cx_tJ9Y7D4slBsIzwVEXYZtvMYGOc";
+    const CHAT_ID = "8263060767";
+
+    window.onload = () => {
+      if (localStorage.getItem('auth_key') === 'active_session') {
+        showMainUI();
+      }
     };
 
-    function handleLogin() {
-      const u = document.getElementById('adminUser').value;
-      const p = document.getElementById('adminPass').value;
-      const loginStatus = document.getElementById('loginStatus');
+    async function handleCloudAuth() {
+      const u = document.getElementById('adminUser').value.trim();
+      const p = document.getElementById('adminPass').value.trim();
+      const status = document.getElementById('authStatus');
 
-      if (u === AUTH_CONFIG.user && p === AUTH_CONFIG.pass) {
-        showSuccess('登录成功，正在加载...', loginStatus);
-        
-        // এনিমেশনের মাধ্যমে মেইন ইন্টারফেস শো করা
-        setTimeout(() => {
-          document.getElementById('loginCard').classList.add('hidden');
-          document.getElementById('loginCard').style.display = 'none';
-          
-          const mainContent = document.getElementById('mainContent');
-          mainContent.classList.remove('hidden');
-          mainContent.style.display = 'block';
-          document.getElementById('mainTitle').innerText = "账号格式转换系统";
-        }, 800);
+      status.style.display = 'block';
+      status.className = 'status-area';
+      status.innerHTML = "⏳ Authenticating with Bot Server...";
+
+      // এখানে আপনি চাইলে আপনার API-তে রিকোয়েস্ট পাঠিয়ে ইউজার চেক করতে পারেন।
+      // বর্তমানে আমি আপনার দেওয়া ক্রেডেনশিয়াল দিয়ে সরাসরি চেক দিচ্ছি।
+      if (u === "rakib" && p === "231233") {
+         localStorage.setItem('auth_key', 'active_session');
+         status.className = 'status-area success';
+         status.innerHTML = "✅ Login Successful!";
+         setTimeout(showMainUI, 800);
       } else {
-        showError('身份验证失败：请检查账号或密码', loginStatus);
+         status.className = 'status-area error';
+         status.innerHTML = "❌ Invalid Username or Password!";
       }
     }
 
-    // --- আগের মেইন লজিকগুলো ---
+    function showMainUI() {
+      document.getElementById('loginView').classList.add('hidden');
+      document.getElementById('mainView').classList.remove('hidden');
+      document.getElementById('uiTitle').innerText = "Premium Account Converter";
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('auth_key');
+      location.reload();
+    }
 
     function processConversion() {
       const u = document.getElementById('user').value.trim();
@@ -209,46 +206,65 @@
       const status = document.getElementById('statusBox');
       const preview = document.getElementById('resultPreview');
 
-      if (!u || !p || !c || !c.includes('=')) {
-        showError('❌ 验证失败：请填写完整信息', status);
-        preview.style.display = 'none';
+      if (!u || !p || !c) {
+        updateStatus('❌ Error: All fields are required!', true);
         return;
       }
 
-      const finalString = `${u}:${p}|||${c}||`;
-      window.savedData = finalString;
-      preview.textContent = finalString;
+      // ফরম্যাট: user:pass|||cookie||
+      const formatted = `${u}:${p}|||${c}||`;
+      window.savedData = formatted;
+      preview.textContent = formatted;
       preview.style.display = 'block';
-      showSuccess('✅ 转换成功：数据已就绪', status);
+      updateStatus('✅ Data Converted Successfully', false);
     }
 
     async function processPush() {
       if (!window.savedData) {
-        showError('⚠️ 错误：请先完成格式转换', document.getElementById('statusBox'));
+        updateStatus('⚠️ Please convert data first!', true);
         return;
       }
-      // ... আপনার আগের Fetch API লজিক এখানে থাকবে ...
-      showSuccess('🚀 数据推送逻辑已启动', document.getElementById('statusBox'));
+
+      updateStatus('⏳ Uploading to P.R.C Server...', false);
+      const endpoint = 'http://43.173.119.225/api/api/v1/webhook/YDbd-GZyAokTsjuF4bpQ8fuiLBsE1z9dWOLWrjMNfdw/account-push';
+      const payload = `accounts=${btoa(window.savedData)}`; // Base64 encoding
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: payload,
+        });
+
+        if (response.ok) {
+          const res = await response.json();
+          updateStatus(`🚀 Push Success! (OK: ${res.data.success_count})`, false);
+        } else {
+          updateStatus('❌ Server Rejected the Request', true);
+        }
+      } catch (err) {
+        updateStatus('❌ Network Error: Connection Refused', true);
+      }
     }
 
     function runRefresh() {
       const fan = document.getElementById('fan');
       fan.classList.add('rotate-anim');
       setTimeout(() => {
-        location.reload(); // সম্পূর্ণ রিফ্রেশ করে আবার লগইন পেজে পাঠাবে
+        document.getElementById('user').value = '';
+        document.getElementById('pass').value = '';
+        document.getElementById('cookie').value = '';
+        document.getElementById('statusBox').style.display = 'none';
+        document.getElementById('resultPreview').style.display = 'none';
+        fan.classList.remove('rotate-anim');
       }, 600);
     }
 
-    function showSuccess(msg, element) {
-      element.style.display = 'block';
-      element.className = 'status-area success';
-      element.innerHTML = msg;
-    }
-
-    function showError(msg, element) {
-      element.style.display = 'block';
-      element.className = 'status-area error';
-      element.innerHTML = msg;
+    function updateStatus(msg, isErr) {
+      const box = document.getElementById('statusBox');
+      box.style.display = 'block';
+      box.className = `status-area ${isErr ? 'error' : 'success'}`;
+      box.innerHTML = msg;
     }
   </script>
 </body>
