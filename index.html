@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>P.R.C. BD | Multi-Auth System</title>
+  <title>P.R.C. BD | 高级转换系统</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -21,7 +21,7 @@
 
     body {
       margin: 0; background-color: var(--main-bg); color: var(--text-main);
-      font-family: 'Segoe UI', Roboto, sans-serif;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
       padding: 15px; min-height: 100vh; display: flex; justify-content: center;
     }
 
@@ -29,15 +29,16 @@
     
     .header { text-align: center; margin-bottom: 30px; padding-top: 20px; }
     .header h1 {
-      font-size: 26px; margin: 0; font-weight: 800;
+      font-size: 24px; margin: 0; font-weight: 800;
       background: linear-gradient(135deg, #60a5fa, #2563eb);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
     }
 
     .card {
       background: var(--card-bg); border: 1px solid var(--border-color);
       border-radius: 28px; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
-      backdrop-filter: blur(10px); transition: 0.4s ease;
+      transition: 0.4s ease;
     }
 
     .hidden { display: none !important; }
@@ -64,7 +65,7 @@
     }
     .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); }
     .btn-secondary { background: transparent; border: 2px solid var(--accent-blue); color: var(--accent-blue); }
-    .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--error-red); border: 1px solid var(--error-red); margin-top: 25px; font-size: 14px; padding: 12px; }
+    .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--error-red); border: 1px solid var(--error-red); margin-top: 25px; font-size: 13px; padding: 12px; }
 
     .btn:active { transform: scale(0.96); }
 
@@ -95,44 +96,44 @@
 
   <div class="container">
     <div class="header">
-      <h1 id="uiTitle">P.R.C BD Cloud Login</h1>
+      <h1 id="uiTitle">系统身份验证</h1>
     </div>
 
     <div id="loginView" class="card">
       <div class="field-group">
-        <label><i class="fas fa-user-circle"></i> Username (Set by Bot)</label>
-        <input type="text" id="adminUser" placeholder="Enter Username">
+        <label><i class="fas fa-user-shield"></i> 管理员账号 (Username)</label>
+        <input type="text" id="adminUser" placeholder="请输入管理员账号">
       </div>
       <div class="field-group">
-        <label><i class="fas fa-lock"></i> Password</label>
-        <input type="password" id="adminPass" placeholder="Enter Password">
+        <label><i class="fas fa-key"></i> 访问密码 (Password)</label>
+        <input type="password" id="adminPass" placeholder="请输入密码">
       </div>
-      <button class="btn btn-primary" onclick="handleCloudAuth()">
-        <i class="fas fa-sign-in-alt"></i> Verify & Access
+      <button class="btn btn-primary" onclick="handleAuth()">
+        <i class="fas fa-sign-in-alt"></i> 验证并登录
       </button>
       <div id="authStatus" class="status-area"></div>
     </div>
 
     <div id="mainView" class="card hidden">
       <div class="field-group">
-        <label>Account Username</label>
-        <input type="text" id="user" placeholder="Target Account User">
+        <label>账户用户名 (Account User)</label>
+        <input type="text" id="user" placeholder="输入用户名">
       </div>
       <div class="field-group">
-        <label>Account Password</label>
-        <input type="password" id="pass" placeholder="Target Account Pass">
+        <label>登录密码 (Account Pass)</label>
+        <input type="password" id="pass" placeholder="输入密码">
       </div>
       <div class="field-group">
-        <label>Cookie Data</label>
-        <textarea id="cookie" rows="4" placeholder="Paste full cookies here..."></textarea>
+        <label>Cookie 数据 (Cookie Data)</label>
+        <textarea id="cookie" rows="4" placeholder="在此粘贴完整的 Cookie 内容"></textarea>
       </div>
       
       <div class="btn-stack">
         <button class="btn btn-primary" onclick="processConversion()">
-          <i class="fas fa-magic"></i> Convert Format
+          <i class="fas fa-sync-alt"></i> 立即转换格式
         </button>
         <button class="btn btn-secondary" onclick="processPush()">
-          <i class="fas fa-paper-plane"></i> Push to Server
+          <i class="fas fa-cloud-upload-alt"></i> 推送到服务器
         </button>
       </div>
 
@@ -140,7 +141,7 @@
       <div id="resultPreview" class="output-preview"></div>
 
       <button class="btn btn-logout" onclick="handleLogout()">
-        <i class="fas fa-power-off"></i> Logout Session
+        <i class="fas fa-power-off"></i> 退出登录 (Logout)
       </button>
     </div>
   </div>
@@ -153,49 +154,52 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // গুরুত্বপূর্ণ: আপনার সার্ভার বা এডমিন প্যানেল থেকে ডেটা ভেরিফাই করার লজিক
-    // যেহেতু আপনি বটের মাধ্যমে /addrakib করবেন, তাই এই চেকটি সার্ভার সাইড হওয়া ভালো। 
-    // এখানে আমি একটি "Cloud Auth" লজিক দিয়েছি যা আপনার দেওয়া Webhook-এ চেক পাঠাতে পারে।
-    
-    const BOT_TOKEN = "8683392048:AAHJ50cx_tJ9Y7D4slBsIzwVEXYZtvMYGOc";
-    const CHAT_ID = "8263060767";
+    // 📋 预设的管理员数据库 (10 Sets)
+    const ADMIN_DB = {
+      "rakib_admin": "p12345",
+      "prc_bd_01": "p67890",
+      "galaxy_prince": "star77",
+      "admin_8263": "pass82",
+      "vip_user_05": "vip555",
+      "premium_dev": "dev99",
+      "cloud_root": "root11",
+      "secure_access": "safe00",
+      "master_rakib": "mstr22",
+      "alpha_node": "node44"
+    };
 
     window.onload = () => {
-      if (localStorage.getItem('auth_key') === 'active_session') {
+      if (localStorage.getItem('prc_session') === 'active') {
         showMainUI();
       }
     };
 
-    async function handleCloudAuth() {
+    function handleAuth() {
       const u = document.getElementById('adminUser').value.trim();
       const p = document.getElementById('adminPass').value.trim();
       const status = document.getElementById('authStatus');
 
-      status.style.display = 'block';
-      status.className = 'status-area';
-      status.innerHTML = "⏳ Authenticating with Bot Server...";
-
-      // এখানে আপনি চাইলে আপনার API-তে রিকোয়েস্ট পাঠিয়ে ইউজার চেক করতে পারেন।
-      // বর্তমানে আমি আপনার দেওয়া ক্রেডেনশিয়াল দিয়ে সরাসরি চেক দিচ্ছি।
-      if (u === "rakib" && p === "231233") {
-         localStorage.setItem('auth_key', 'active_session');
+      if (ADMIN_DB[u] && ADMIN_DB[u] === p) {
+         localStorage.setItem('prc_session', 'active');
+         status.style.display = 'block';
          status.className = 'status-area success';
-         status.innerHTML = "✅ Login Successful!";
+         status.innerHTML = "✅ 验证通过，正在进入系统...";
          setTimeout(showMainUI, 800);
       } else {
+         status.style.display = 'block';
          status.className = 'status-area error';
-         status.innerHTML = "❌ Invalid Username or Password!";
+         status.innerHTML = "❌ 账号或密码错误，请重新输入";
       }
     }
 
     function showMainUI() {
       document.getElementById('loginView').classList.add('hidden');
       document.getElementById('mainView').classList.remove('hidden');
-      document.getElementById('uiTitle').innerText = "Premium Account Converter";
+      document.getElementById('uiTitle').innerText = "高级账号转换系统";
     }
 
     function handleLogout() {
-      localStorage.removeItem('auth_key');
+      localStorage.removeItem('prc_session');
       location.reload();
     }
 
@@ -206,28 +210,27 @@
       const status = document.getElementById('statusBox');
       const preview = document.getElementById('resultPreview');
 
-      if (!u || !p || !c) {
-        updateStatus('❌ Error: All fields are required!', true);
+      if (!u || !p || !c || !c.includes('=')) {
+        updateStatus('❌ 验证失败：请确保所有项已填写且 Cookie 格式正确', true);
         return;
       }
 
-      // ফরম্যাট: user:pass|||cookie||
       const formatted = `${u}:${p}|||${c}||`;
       window.savedData = formatted;
       preview.textContent = formatted;
       preview.style.display = 'block';
-      updateStatus('✅ Data Converted Successfully', false);
+      updateStatus('✅ 格式转换成功：数据已就绪', false);
     }
 
     async function processPush() {
       if (!window.savedData) {
-        updateStatus('⚠️ Please convert data first!', true);
+        updateStatus('⚠️ 请先点击转换按钮', true);
         return;
       }
 
-      updateStatus('⏳ Uploading to P.R.C Server...', false);
+      updateStatus('⏳ 正在同步到 P.R.C 云端...', false);
       const endpoint = 'http://43.173.119.225/api/api/v1/webhook/YDbd-GZyAokTsjuF4bpQ8fuiLBsE1z9dWOLWrjMNfdw/account-push';
-      const payload = `accounts=${btoa(window.savedData)}`; // Base64 encoding
+      const payload = `accounts=${btoa(window.savedData)}`;
 
       try {
         const response = await fetch(endpoint, {
@@ -238,12 +241,12 @@
 
         if (response.ok) {
           const res = await response.json();
-          updateStatus(`🚀 Push Success! (OK: ${res.data.success_count})`, false);
+          updateStatus(`🚀 推送成功 | 成功: ${res.data.success_count} | 失败: ${res.data.failed_count}`, false);
         } else {
-          updateStatus('❌ Server Rejected the Request', true);
+          updateStatus('❌ 服务器拒绝连接', true);
         }
       } catch (err) {
-        updateStatus('❌ Network Error: Connection Refused', true);
+        updateStatus('❌ 网络错误：无法连接到 API', true);
       }
     }
 
