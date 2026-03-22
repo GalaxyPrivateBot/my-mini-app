@@ -115,8 +115,8 @@
   <div id="auth-screen">
     <div class="auth-card">
       <h2 style="color:var(--accent); margin-bottom:20px;">系统登录</h2>
-      <input type="text" id="l-user" class="auth-input" placeholder="用户名 (PrinceX)">
-      <input type="password" id="l-pass" class="auth-input" placeholder="密码 (Pass77)">
+      <input type="text" id="l-user" class="auth-input" placeholder="用户名">
+      <input type="password" id="l-pass" class="auth-input" placeholder="密码">
       <button class="auth-btn" onclick="handleLogin()">进入系统</button>
     </div>
   </div>
@@ -164,19 +164,31 @@
   </div>
 
   <script>
-    const DATABASE = { "PrinceX": "Pass77", "Admin": "Root00" };
+    // 30 Unique Admin Credentials
+    const DATABASE = {
+      "PrinceX": "Pass77", "Admin": "Root00", "Galaxy": "Star99",
+      "MatrixCore": "Admin99", "CyberX9": "Auth88", "EliteRoot": "Root01",
+      "NovaPrime": "Nova2026", "ShadowZ": "VoidX", "Titan8": "Base99",
+      "AlphaMax": "Alpha77", "NexusV": "NexusX", "Vortex9": "Vortex1",
+      "Ghost7": "Ghost00", "Cobra9": "Cobra99", "SkyNet": "Sky88X",
+      "Zenith": "ZenVIP", "Oracle": "Code55", "Phantom": "Dark77",
+      "Logic9": "Logi01", "Vector": "Vec99", "Storm": "Wind44",
+      "Pulse": "Beat22", "Neon": "Light11", "Carbon": "Element6",
+      "Astro": "Moon88", "Frost": "Ice00", "Blaze": "Fire11",
+      "Omega": "End99", "Pixel": "Art44", "Swift": "Fast22"
+    };
 
     window.onload = () => {
         if (sessionStorage.getItem("isLoggedIn") === "true") showApp();
     };
 
     function handleLogin() {
-        const u = document.getElementById('l-user').value;
-        const p = document.getElementById('l-pass').value;
+        const u = document.getElementById('l-user').value.trim();
+        const p = document.getElementById('l-pass').value.trim();
         if (DATABASE[u] && DATABASE[u] === p) {
             sessionStorage.setItem("isLoggedIn", "true");
             showApp();
-        } else { alert("验证失败！"); }
+        } else { alert("验证失败！请检查用户名和密码。"); }
     }
 
     function showApp() {
@@ -211,7 +223,7 @@
             document.getElementById('sCount').innerText = "成功: 0";
             document.getElementById('fCount').innerText = "异常: 0";
             document.getElementById('pStatus').innerText = "云端: 等待";
-            updateStatus("已清空", false);
+            updateStatus("已完全清空所有数据", false);
             document.getElementById('refreshBtn').classList.remove('spinning');
         }, 500);
     }
@@ -222,7 +234,7 @@
         const c = document.getElementById('uCook').value.trim();
 
         if (!u || !p || !c) {
-            updateStatus("❌ 错误: 请填写信息", true);
+            updateStatus("❌ 错误: 请填写所有必要的信息", true);
             document.getElementById('fCount').innerText = "异常: 1";
             document.getElementById('sCount').innerText = "成功: 0";
             return;
@@ -231,12 +243,15 @@
         document.getElementById('outputText').value = `${u}:${p}|||${c}||`;
         document.getElementById('sCount').innerText = "成功: 1";
         document.getElementById('fCount').innerText = "异常: 0";
-        updateStatus("✅ 转换完成", false);
+        updateStatus("✅ 格式转换已完成", false);
     }
 
     async function processPush() {
         const data = document.getElementById('outputText').value;
-        if (!data) return;
+        if (!data) {
+            updateStatus("❌ 错误: 无数据可推送", true);
+            return;
+        }
         const pTag = document.getElementById('pStatus');
         pTag.innerText = "云端: 同步中...";
         
@@ -248,11 +263,11 @@
             });
             if (res.ok) {
                 pTag.innerText = "云端: 同步成功";
-                updateStatus("🚀 推送成功", false);
+                updateStatus("🚀 数据已成功推送到云端", false);
             } else { throw new Error(); }
         } catch (e) {
             pTag.innerText = "云端: 异常";
-            updateStatus("❌ 推送失败", true);
+            updateStatus("❌ 远程推送失败", true);
         }
     }
 
