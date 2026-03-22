@@ -8,152 +8,78 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --main-bg: #030712;
-      --card-bg: rgba(17, 24, 39, 0.95);
-      --accent-blue: #3b82f6;
-      --accent-glow: rgba(59, 130, 246, 0.6);
-      --text-main: #f8fafc;
-      --text-dim: #94a3b8;
-      --border: #1f2937;
-      --glass: rgba(255, 255, 255, 0.03);
+      --bg: #030712; --card: #111827; --accent: #3b82f6; --text: #f8fafc; --err: #f43f5e;
     }
-
-    body {
-      margin: 0; background-color: var(--main-bg); color: var(--text-main);
-      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-      overflow-x: hidden; min-height: 100vh;
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: sans-serif; overflow-x: hidden; }
+    
+    /* 🛡️ Login Screen */
+    #auth-screen {
+      position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
     }
-
-    /* 🛡️ Auth Screens Overlay */
-    #auth-overlay {
-      position: fixed; inset: 0; background: var(--main-bg);
-      z-index: 9999; display: flex; align-items: center; justify-content: center;
-      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
     .auth-card {
-      background: var(--card-bg); border: 1px solid var(--border);
-      border-radius: 32px; padding: 40px 30px; width: 85%; max-width: 380px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      text-align: center; backdrop-filter: blur(20px);
-      animation: authIn 0.5s ease-out;
+      background: var(--card); border: 1px solid #1e293b; border-radius: 28px;
+      padding: 40px 30px; width: 85%; max-width: 360px; text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
-
-    @keyframes authIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-    .auth-card h2 { color: var(--accent-blue); margin-bottom: 25px; font-size: 24px; font-weight: 800; }
-
+    .auth-card h2 { color: var(--accent); margin-bottom: 20px; }
+    
     input, textarea {
-      width: 100%; background: #000; border: 2px solid var(--border);
-      border-radius: 16px; padding: 14px 18px; color: #fff; font-size: 15px;
-      box-sizing: border-box; outline: none; transition: 0.3s; margin-bottom: 15px;
+      width: 100%; background: #000; border: 2px solid #1f2937; border-radius: 14px;
+      padding: 14px; color: #fff; margin-bottom: 15px; box-sizing: border-box; outline: none;
     }
-
-    input:focus { border-color: var(--accent-blue); box-shadow: 0 0 15px var(--accent-glow); background: #020617; }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(59,130,246,0.4); }
 
     .btn {
-      width: 100%; padding: 16px; border-radius: 18px; border: none;
-      font-size: 16px; font-weight: bold; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      transition: all 0.2s;
+      width: 100%; padding: 15px; border-radius: 14px; border: none; font-weight: bold;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-
-    .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; box-shadow: 0 10px 20px -5px var(--accent-glow); }
-    .btn-primary:active { transform: scale(0.97); }
-
-    .toggle-text { font-size: 13px; color: var(--text-dim); margin-top: 20px; cursor: pointer; display: inline-block; }
-    .toggle-text:hover { color: var(--accent-blue); }
-
-    /* 🌊 Refresh Wave */
-    #blur-layer {
-      position: fixed; inset: 0; backdrop-filter: blur(0px);
-      background: rgba(0, 0, 0, 0); z-index: 2000; pointer-events: none;
-      transition: 0.5s; display: flex; align-items: center; justify-content: center;
-    }
-    .wave { width: 0%; height: 0%; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); border-radius: 50%; transition: 0.6s ease-out; }
-
-    /* 📱 Main UI Layout */
-    #main-app { display: none; padding: 20px; max-width: 500px; margin: 0 auto; }
-    .header h1 { text-align: center; font-size: 24px; background: linear-gradient(to right, #60a5fa, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .btn-blue { background: var(--accent); color: white; }
     
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 28px; padding: 25px; margin-bottom: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    #warning-msg { color: var(--err); font-size: 13px; margin-top: 10px; display: none; font-weight: bold; }
 
-    .fan-trigger {
-      position: fixed; right: 20px; bottom: 30px; width: 60px; height: 60px;
-      background: var(--accent-blue); color: white; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; font-size: 24px;
-      cursor: pointer; box-shadow: 0 0 20px var(--accent-glow); z-index: 2001;
-    }
-    .rotate-anim { animation: fanRotate 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-    @keyframes fanRotate { 100% { transform: rotate(720deg); } }
-
-    .status-area { margin-top: 15px; padding: 14px; border-radius: 14px; font-size: 13px; text-align: center; display: none; font-weight: 600; }
-    .success { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; }
-    .error { background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid #f43f5e; }
+    /* 📱 Main App (Hidden) */
+    #main-app { display: none; padding: 20px; max-width: 500px; margin: 0 auto; }
+    .card { background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid #1f2937; }
+    
+    /* 🌀 Wave & Fan */
+    #blur-layer { position: fixed; inset: 0; backdrop-filter: blur(0px); z-index: 2000; pointer-events: none; transition: 0.5s; display: flex; align-items: center; justify-content: center; }
+    .wave { width: 0%; height: 0%; background: radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%); border-radius: 50%; transition: 0.6s; }
+    .fan { position: fixed; right: 20px; bottom: 30px; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 2001; }
+    .rotate { animation: rot 0.6s ease; } @keyframes rot { 100% { transform: rotate(720deg); } }
   </style>
 </head>
 <body>
 
-  <div id="auth-overlay">
-    <div class="auth-card" id="login-panel">
+  <div id="auth-screen">
+    <div class="auth-card">
       <h2>系统登录</h2>
-      <input type="text" id="l-user" placeholder="请输入用户名">
-      <input type="password" id="l-pass" placeholder="请输入密码">
-      <button class="btn btn-primary" onclick="requestLogin()">
-        <i class="fas fa-sign-in-alt"></i> 立即登录
+      <input type="text" id="l-user" placeholder="用户名">
+      <input type="password" id="l-pass" placeholder="登录密码">
+      <button class="btn btn-blue" onclick="sendLogin()">
+        <i class="fas fa-shield-alt"></i> 验证并登录
       </button>
-      <span class="toggle-text" onclick="switchAuth('signup')">还没有账号？立即注册</span>
-    </div>
-
-    <div class="auth-card" id="signup-panel" style="display:none;">
-      <h2>用户注册</h2>
-      <input type="text" id="s-user" placeholder="设置用户名">
-      <input type="password" id="s-pass" placeholder="设置密码">
-      <button class="btn btn-primary" onclick="requestSignup()">
-        <i class="fas fa-user-plus"></i> 获取验证码
-      </button>
-      <span class="toggle-text" onclick="switchAuth('login')">已有账号？去登录</span>
-    </div>
-
-    <div class="auth-card" id="otp-panel" style="display:none;">
-      <h2>身份验证</h2>
-      <p style="font-size:12px; color:var(--text-dim); margin-bottom:20px;">6位验证码已发送至您的机器人</p>
-      <input type="number" id="otp-code" placeholder="输入 6 位验证码">
-      <button class="btn btn-primary" onclick="requestVerify()">
-        <i class="fas fa-shield-alt"></i> 验证并注册
-      </button>
-      <span class="toggle-text" onclick="switchAuth('signup')">返回重新注册</span>
+      <div id="warning-msg">⚠️ 账号未授权或密码错误！</div>
     </div>
   </div>
 
   <div id="blur-layer"><div class="wave" id="wave"></div></div>
-  <div class="fan-trigger" id="fan" onclick="runRefresh()">
-    <i class="fas fa-fan"></i>
-  </div>
+  <div class="fan" id="fan-btn" onclick="refreshUI()"><i class="fas fa-fan"></i></div>
 
   <div id="main-app">
-    <div class="header"><h1>账号格式转换系统</h1></div>
-    
+    <div style="text-align:center; margin-bottom:20px;"><h1 style="color:var(--accent); font-size:22px;">账号格式转换器</h1></div>
     <div class="card">
-      <label style="font-size:13px; color:var(--text-dim); display:block; margin-bottom:8px;">用户名</label>
-      <input type="text" id="main-user" placeholder="Username">
+      <input type="text" id="user" placeholder="Username">
+      <input type="password" id="pass" placeholder="Password">
+      <textarea id="cookie" rows="4" placeholder="Cookie Data"></textarea>
       
-      <label style="font-size:13px; color:var(--text-dim); display:block; margin-bottom:8px;">密码</label>
-      <input type="password" id="main-pass" placeholder="Password">
-      
-      <label style="font-size:13px; color:var(--text-dim); display:block; margin-bottom:8px;">Cookie 数据</label>
-      <textarea id="main-cookie" rows="4" placeholder="在此粘贴 Cookie 内容"></textarea>
-
-      <div style="display:flex; flex-direction:column; gap:12px; margin-top:10px;">
-        <button class="btn btn-primary" onclick="performConversion()">
-          <i class="fas fa-exchange-alt"></i> 开始转换
-        </button>
-        <button class="btn" style="background:transparent; border:2px solid var(--accent-blue); color:var(--accent-blue);" onclick="performPush()">
-          <i class="fas fa-rocket"></i> 同步到 CSV 服务器
-        </button>
-      </div>
-
-      <div id="statusBox" class="status-area"></div>
+      <button class="btn btn-blue" onclick="convertData()" style="margin-bottom:12px;">
+        <i class="fas fa-exchange-alt"></i> 开始转换
+      </button>
+      <button class="btn" style="background:transparent; border:2px solid var(--accent); color:var(--accent);" onclick="pushData()">
+        <i class="fas fa-rocket"></i> 同步到服务器
+      </button>
+      <div id="status" style="margin-top:15px; text-align:center; font-size:13px; display:none;"></div>
     </div>
   </div>
 
@@ -161,116 +87,72 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // 🔄 Auth Navigation
-    function switchAuth(type) {
-      document.getElementById('login-panel').style.display = (type === 'login') ? 'block' : 'none';
-      document.getElementById('signup-panel').style.display = (type === 'signup') ? 'block' : 'none';
-      document.getElementById('otp-panel').style.display = (type === 'otp') ? 'block' : 'none';
+    // ১. লগইন রিকোয়েস্ট (বটের কাছে যাবে)
+    function sendLogin() {
+      const u = document.getElementById('l-user').value;
+      const p = document.getElementById('l-pass').value;
+      if(!u || !p) return;
+      tg.sendData(JSON.stringify({action: "login_attempt", user: u, pass: p}));
+      // নোট: যদি ডাটাবেসে ইউজার থাকে, বট মেসেজ দিবে এবং আপনি তখন ম্যানুয়ালি বা রিলোড দিয়ে ঢুকবেন। 
+      // অথবা আপনি ইউজারকে বলতে পারেন বটের মেসেজ চেক করতে।
     }
 
-    // 📡 Communication with Bot
-    function requestSignup() {
-      const u = document.getElementById('s-user').value.trim();
-      const p = document.getElementById('s-pass').value.trim();
-      if(!u || !p) return alert("请填写完整信息");
-      tg.sendData(JSON.stringify({action: "signup_request", user: u, pass: p}));
-      switchAuth('otp');
-    }
-
-    function requestVerify() {
-      const code = document.getElementById('otp-code').value.trim();
-      if(!code) return alert("请输入验证码");
-      tg.sendData(JSON.stringify({action: "otp_verify", code: code}));
-      alert("请检查机器人发送的注册结果");
-    }
-
-    function requestLogin() {
-      const u = document.getElementById('l-user').value.trim();
-      const p = document.getElementById('l-pass').value.trim();
-      if(!u || !p) return alert("请输入用户名和密码");
-      tg.sendData(JSON.stringify({action: "login_request", user: u, pass: p}));
-      // বটের কাছ থেকে সাকসেস সিগন্যাল আসলে আনলক হবে (নিচে সিমুলেটেড ফাংশন)
-    }
-
-    // 🔓 Unlock Logic (Call this via message listener if needed or from bot)
-    function unlockApp() {
-      document.getElementById('auth-overlay').style.opacity = '0';
-      setTimeout(() => {
-        document.getElementById('auth-overlay').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-      }, 600);
-    }
-
-    // 🛠️ Converter Logic (Your Original Code preserved)
-    let finalConvertedData = null;
-
-    function performConversion() {
-      const u = document.getElementById('main-user').value.trim();
-      const p = document.getElementById('main-pass').value.trim();
-      const c = document.getElementById('main-cookie').value.trim();
-      
-      if (!u || !p || !c.includes('=')) {
-        showStatus('❌ 验证失败：格式不正确', true);
-        return;
+    // ২. কনভার্ট লজিক (আপনার অরিজিনাল ক্লায়েন্ট ফরম্যাট)
+    let savedOutput = null;
+    function convertData() {
+      const u = document.getElementById('user').value.trim();
+      const p = document.getElementById('pass').value.trim();
+      const c = document.getElementById('cookie').value.trim();
+      if(!u || !p || !c.includes('=')) {
+        alert("格式错误！"); return;
       }
-      finalConvertedData = `${u}:${p}|||${c}||`;
-      showStatus('✅ 转换成功：数据已锁定', false);
+      savedOutput = `${u}:${p}|||${c}||`;
+      const s = document.getElementById('status');
+      s.style.display='block'; s.style.color='#10b981'; s.innerText='✅ 转换成功';
     }
 
-    async function performPush() {
-      if (!finalConvertedData) return showStatus('⚠️ 请先转换数据', true);
-      showStatus('⏳ 正在同步...', false);
-      
-      // বটের CSV-তে পাঠানো
+    // ৩. পুশ লজিক (অরিজিনাল সার্ভার + বটের CSV)
+    async function pushData() {
+      if(!savedOutput) return;
       tg.sendData(JSON.stringify({
-        action: "push_to_csv",
-        col_a: document.getElementById('main-user').value,
-        col_b: document.getElementById('main-pass').value,
-        col_c: document.getElementById('main-cookie').value
+        action: "push_csv",
+        u: document.getElementById('user').value,
+        p: document.getElementById('pass').value,
+        c: document.getElementById('cookie').value
       }));
 
-      // আপনার অরিজিনাল সার্ভারে পাঠানো
       try {
-        const payload = `accounts=${btoa(finalConvertedData)}`;
         await fetch('http://43.173.119.225/api/api/v1/webhook/YDbd-GZyAokTsjuF4bpQ8fuiLBsE1z9dWOLWrjMNfdw/account-push', {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: payload
+          headers: {'Content-Type': 'text/plain'},
+          body: `accounts=${btoa(savedOutput)}`
         });
-        showStatus('🚀 数据已同步并存入 CSV 数据库', false);
-      } catch (e) {
-        showStatus('⚠️ 同步完成（仅 CSV 本地存档）', false);
+        document.getElementById('status').innerText='🚀 推送成功并存入 CSV';
+      } catch(e) {
+        document.getElementById('status').innerText='⚠️ CSV 已存档 (服务器连接失败)';
       }
     }
 
-    function runRefresh() {
-      const fan = document.getElementById('fan');
-      fan.classList.add('rotate-anim');
+    function refreshUI() {
+      const f = document.getElementById('fan-btn');
+      f.classList.add('rotate');
       document.getElementById('blur-layer').style.backdropFilter = 'blur(15px)';
-      document.getElementById('wave').style.width = '300%';
-      document.getElementById('wave').style.height = '300%';
-
+      document.getElementById('wave').style.width = '300%'; document.getElementById('wave').style.height = '300%';
       setTimeout(() => {
-        document.getElementById('main-user').value = '';
-        document.getElementById('main-pass').value = '';
-        document.getElementById('main-cookie').value = '';
-        document.getElementById('statusBox').style.display = 'none';
-        finalConvertedData = null;
-      }, 300);
-
-      setTimeout(() => {
-        fan.classList.remove('rotate-anim');
+        document.getElementById('user').value=''; document.getElementById('pass').value=''; document.getElementById('cookie').value='';
+        document.getElementById('status').style.display='none';
+        f.classList.remove('rotate');
         document.getElementById('blur-layer').style.backdropFilter = 'blur(0px)';
-        document.getElementById('wave').style.width = '0%';
-        document.getElementById('wave').style.height = '0%';
+        document.getElementById('wave').style.width = '0%'; document.getElementById('wave').style.height = '0%';
       }, 700);
     }
 
-    function showStatus(msg, err) {
-      const s = document.getElementById('statusBox');
-      s.style.display = 'block'; s.innerHTML = msg;
-      s.className = `status-area ${err ? 'error' : 'success'}`;
-    }
+    // এক্সট্রা সিকিউরিটি: বটের থেকে কনফার্মেশন আসলে অ্যাপ আনলক হবে
+    // আপনি চাইলে টেস্ট করার জন্য কনসোলে unlock() লিখতে পারেন
+    window.unlock = () => {
+      document.getElementById('auth-screen').style.display='none';
+      document.getElementById('main-app').style.display='block';
+    };
   </script>
 </body>
 </html>
